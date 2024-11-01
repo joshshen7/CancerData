@@ -1,0 +1,80 @@
+---
+title: "ShenJ_Assignment3"
+author: "Joshua Shen"
+date: "2024-10-27"
+output: word_document
+---
+
+```{r}
+install.packages("caret", repos = "http://cran.us.r-project.org")
+library(caret)
+install.packages("tidyverse", repos = "http://cran.us.rproject.org")
+library(tidyr)
+library(ggplot2)
+library(dplyr)
+install.packages('class',repos = "http://cran.us.r-project.org")
+library(class)
+
+```
+1. Load the dataset
+```{r}
+cancer_data <- read.csv("cancer_data.csv", stringsAsFactors = TRUE)
+View(cancer_data)
+```
+
+2. Display the data
+```{r}
+head(cancer_data)
+summary(cancer_data)
+str(cancer_data)
+```
+3. Delete the ID column
+```{r}
+cancer_data <- cancer_data[, -1]
+str(cancer_data)
+```
+4. Normalize all predictor values
+```{r}
+normalize <- function(x){return((x-min(x))/(max(x)-min(x)))}
+normalize(c(1,2,3,4,5))
+normalize(c(1,3,6,7,9))
+cancer_data_n <- as.data.frame(lapply(cancer_data[-1],normalize))
+```
+5. Summary
+```{r}
+summary(cancer_data_n)
+```
+7. Split data
+```{r}
+set.seed(1)
+subset_int <- sample(nrow(cancer_data_n),
+floor(nrow(cancer_data_n)*0.8))
+cd_train<- cancer_data_n [subset_int, ]
+cd_test<-cancer_data_n[-subset_int, ] 
+```
+8. Create 4 data frames
+```{r}
+cd_train_labels <- cancer_data[subset_int,1]
+cd_test_labels <- cancer_data[-subset_int,1]
+train <- cd_train
+test <- cd_test
+trainingclass <- cd_train_labels
+testingclass <- cd_test_labels
+
+```
+9. KNN Alogorithm
+```{r}
+library(class)
+cd_test_predict <- knn(train = cd_train, test = cd_test, cl = cd_train_labels, k=24)
+cd_test_predict
+
+```
+10. Confusion Matrix
+```{r}
+library(caret)
+corr5 <- cor(as.numeric(cd_test_labels),as.numeric(cd_test_predict))
+corr5
+cm <- confusionMatrix(as.factor(cd_test_labels),as.factor(cd_test_predict))
+cm
+```
+
